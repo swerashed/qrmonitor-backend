@@ -13,7 +13,10 @@ interface EmailOptions {
 export const sendEmail = async (options: EmailOptions) => {
     const msg = {
         to: options.email,
-        from: config.emailSender.email || 'no-reply@qrmonitor.app', // Verified sender from config
+        from: {
+            email: config.emailSender.email || 'no-reply@qrmonitor.app',
+            name: config.emailSender.name || 'QR Monitor',
+        },
         subject: options.subject,
         html: options.htmlContent,
     };

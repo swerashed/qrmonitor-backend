@@ -21,5 +21,6 @@ export default {
   reset_pass_link: process.env.RESET_PASSWORD_LINK,
   emailSender: {
     email: process.env.SENDER_EMAIL,
+    name: process.env.SENDER_NAME
   }
 };

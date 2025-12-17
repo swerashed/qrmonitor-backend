@@ -122,17 +122,20 @@ const forgotPassword = async (payload: { email: string }) => {
     },
   });
 
-  const resetPassToken = jwtHelpers.generateToken(
-    {
-      email: userData.email,
-      role: userData.role,
-    },
-    config.jwt.reset_pass_secret as Secret,
-    config.jwt.reset_pass_secret_expires_in as string
-  );
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-  const resetPassLink =
-    config.reset_pass_link + `?userId=${userData.id}&token=${resetPassToken}`;
+  // Save OTP to DB
+  await prisma.user.update({
+    where: {
+      email: userData.email,
+    },
+    data: {
+      otp: otp,
+      otpExpiry: otpExpiry
+    } as any,
+  });
+
 
   const htmlContent = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #0f172a; border-radius: 8px; border: 1px solid #1e293b; color: #f8fafc;">
@@ -143,14 +146,12 @@ const forgotPassword = async (payload: { email: string }) => {
         <h2 style="color: #e2e8f0; font-size: 20px; margin-top: 0;">Password Reset Request</h2>
         <p style="color: #94a3b8; font-size: 16px; line-height: 1.6;">Hello <strong>${userData.name || "User"}</strong>,</p>
         <p style="color: #94a3b8; font-size: 15px;">
-          We received a request to reset your password. To proceed, please click the button below:
+           Use the code below to reset your password. This code is valid for 10 minutes.
         </p>
         <div style="margin: 32px 0;">
-          <a href="${resetPassLink}" style="text-decoration: none;">
-            <button style="background-color: #6d28d9; color: #ffffff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer;">
-              Reset Password
-            </button>
-          </a>
+           <span style="background-color: #6d28d9; color: #ffffff; padding: 12px 24px; border-radius: 6px; font-size: 28px; font-weight: bold; letter-spacing: 4px; display: inline-block;">
+            ${otp}
+          </span>
         </div>
         <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">
           If you didn't request this, you can safely ignore this email.
@@ -168,37 +169,51 @@ const forgotPassword = async (payload: { email: string }) => {
 
   await emailSender(
     userData.email,
-    "Password Reset Request",
-    "Click the link to reset your password",
+    "Password Reset Code",
+    `Your password reset code is: ${otp}`,
     htmlContent
   );
+};
 
-  // console.log(resetPassLink);
+const checkResetOtp = async (payload: { email: string; otp: string }) => {
+  const userData: any = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: payload.email,
+    },
+  });
+
+  if (userData.otp !== payload.otp) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid OTP!");
+  }
+
+  if (userData.otpExpiry && new Date() > userData.otpExpiry) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "OTP has expired!");
+  }
+
+  return { isValid: true };
 };
 
 const resetPassword = async (
-  token: string,
-  payload: { id: string; newPassword: string }
+  payload: { email: string; otp: string; newPassword: string }
 ) => {
-  const userData = await prisma.user.findUniqueOrThrow({
+  const userData: any = await prisma.user.findUniqueOrThrow({
     where: {
-      id: payload.id,
-      // status: UserStatus.ACTIVE,
+      email: payload.email,
     },
   });
-  const isValidToken = jwtHelpers.verifyToken(
-    token,
-    config.jwt.access_secret as Secret
-  );
 
-  if (!isValidToken) {
-    throw new AppError(StatusCodes.FORBIDDEN, "Access Denied. Sorry!!");
+  if (userData.otp !== payload.otp) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Invalid OTP!");
+  }
+
+  if (userData.otpExpiry && new Date() > userData.otpExpiry) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "OTP has expired!");
   }
 
   // hash pass
   const hashedPassword: string = await bcrypt.hash(
     payload.newPassword,
-    config.bcrypt.salt_round
+    Number(config.bcrypt.salt_round)
   );
 
   // update into db
@@ -208,7 +223,6 @@ const resetPassword = async (
     },
     data: {
       password: hashedPassword,
-      isVerified: true,
       otp: null,
       otpExpiry: null,
     } as any,
@@ -324,4 +338,5 @@ export const AuthService = {
   resetPassword,
   verifyOtp,
   resendOtp,
+  checkResetOtp,
 };

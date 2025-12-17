@@ -45,12 +45,21 @@ router.post(
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
   AuthController.changePassword
 );
-router.post("/forgot-password", AuthController.forgotPassword);
+router.post(
+  "/forgot-password",
+  validateRequest(AuthValidation.forgotPasswordSchema),
+  AuthController.forgotPassword
+);
 router.post("/verify-email", AuthController.verifyOtp);
 router.post("/resend-otp", AuthController.resendOtp);
 router.post(
+  "/check-reset-otp",
+  validateRequest(AuthValidation.checkResetOtpSchema),
+  AuthController.checkResetOtp
+);
+router.post(
   "/reset-password",
-  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER),
+  validateRequest(AuthValidation.resetPasswordSchema),
   AuthController.resetPassword
 );
 
