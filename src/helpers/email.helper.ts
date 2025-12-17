@@ -1,4 +1,5 @@
 import sgMail from '@sendgrid/mail';
+import config from '../config';
 
 // Initialize SendGrid with API Key
 sgMail.setApiKey(process.env.SENDGRID_EMAIL_API_KEY as string);
@@ -12,7 +13,7 @@ interface EmailOptions {
 export const sendEmail = async (options: EmailOptions) => {
     const msg = {
         to: options.email,
-        from: 'tools.rashed@gmail.com', // Verified sender
+        from: config.emailSender.email || 'no-reply@qrmonitor.app', // Verified sender from config
         subject: options.subject,
         html: options.htmlContent,
     };

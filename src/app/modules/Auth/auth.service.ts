@@ -135,33 +135,34 @@ const forgotPassword = async (payload: { email: string }) => {
     config.reset_pass_link + `?userId=${userData.id}&token=${resetPassToken}`;
 
   const htmlContent = `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; padding: 30px; background-color: #1f1b2e; border-radius: 12px; border: 1px solid #3d2f59; color: #e0e0f0;">
-      <h2 style="color: #d6b1ff; text-align: center;">🔐 Password Reset Request</h2>
-      <p style="font-size: 16px; margin-bottom: 20px;">Hello <strong>${userData.name || "User"
-    }</strong>,</p>
-      <p style="font-size: 15px; line-height: 1.6;">
-        We received a request to reset your password. To proceed, please click the button below:
-      </p>
-
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="${resetPassLink}" style="text-decoration: none;">
-          <button style="background-color: #8a4fff; color: #ffffff; padding: 14px 28px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">
-            Reset Password
-          </button>
-        </a>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #0f172a; border-radius: 8px; border: 1px solid #1e293b; color: #f8fafc;">
+      <div style="text-align: center; margin-bottom: 24px;">
+         <h1 style="color: #6d28d9; font-size: 24px; font-weight: bold; margin: 0;">QrMonitor</h1>
       </div>
-
-      <p style="font-size: 14px; color: #c2b8e3;">
-        If you didn’t request this, you can safely ignore this email.
-      </p>
-
-      <hr style="border: none; border-top: 1px solid #3d2f59; margin: 30px 0;" />
-
-      <p style="font-size: 14px; text-align: center;">
-        Need help? Contact us at <a href="${config.CLIENT_URL
-    }/contact" style="color: #a472f4; text-decoration: underline;">support</a><br/>
-        <strong>— The Eventlyze Team</strong>
-      </p>
+      <div style="background-color: #1e293b; padding: 24px; border-radius: 8px; text-align: center;">
+        <h2 style="color: #e2e8f0; font-size: 20px; margin-top: 0;">Password Reset Request</h2>
+        <p style="color: #94a3b8; font-size: 16px; line-height: 1.6;">Hello <strong>${userData.name || "User"}</strong>,</p>
+        <p style="color: #94a3b8; font-size: 15px;">
+          We received a request to reset your password. To proceed, please click the button below:
+        </p>
+        <div style="margin: 32px 0;">
+          <a href="${resetPassLink}" style="text-decoration: none;">
+            <button style="background-color: #6d28d9; color: #ffffff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer;">
+              Reset Password
+            </button>
+          </a>
+        </div>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">
+          If you didn't request this, you can safely ignore this email.
+        </p>
+        <hr style="border: none; border-top: 1px solid #334155; margin: 24px 0;" />
+        <p style="color: #64748b; font-size: 14px;">
+           Need help? Contact us at <a href="${config.CLIENT_URL}/contact" style="color: #a78bfa; text-decoration: underline;">support</a>
+        </p>
+      </div>
+      <div style="text-align: center; margin-top: 24px; color: #64748b; font-size: 12px;">
+        <p>&copy; ${new Date().getFullYear()} QrMonitor. All rights reserved.</p>
+      </div>
     </div>
 `;
 
@@ -280,20 +281,28 @@ const resendOtp = async (payload: { email: string }) => {
   });
 
   const htmlContent = `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; padding: 30px; background-color: #1f1b2e; border-radius: 12px; border: 1px solid #3d2f59; color: #e0e0f0;">
-      <h2 style="color: #d6b1ff; text-align: center;">🛡️ Verify Your Account</h2>
-      <p style="font-size: 16px; margin-bottom: 20px;">Hello <strong>${userData.name}</strong>,</p>
-      <p style="font-size: 15px; line-height: 1.6;">
-        Here is your new verification code. This code is valid for 10 minutes.
-      </p>
-      <div style="text-align: center; margin: 30px 0;">
-        <span style="background-color: #8a4fff; color: #ffffff; padding: 14px 28px; border-radius: 8px; font-size: 24px; font-weight: bold; letter-spacing: 2px;">
-          ${newOtp}
-        </span>
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #0f172a; border-radius: 8px; border: 1px solid #1e293b; color: #f8fafc;">
+      <div style="text-align: center; margin-bottom: 24px;">
+         <h1 style="color: #6d28d9; font-size: 24px; font-weight: bold; margin: 0;">QrMonitor</h1>
       </div>
-      <p style="font-size: 14px; color: #c2b8e3; text-align: center;">
-        If you didn't request a code, you can safely ignore this email.
-      </p>
+      <div style="background-color: #1e293b; padding: 24px; border-radius: 8px; text-align: center;">
+        <h2 style="color: #e2e8f0; font-size: 20px; margin-top: 0;">Verify Your Account</h2>
+        <p style="color: #94a3b8; font-size: 16px; line-height: 1.6;">Hello <strong>${userData.name}</strong>,</p>
+        <p style="color: #94a3b8; font-size: 15px;">
+          Here is your new verification code. This code is valid for 10 minutes.
+        </p>
+        <div style="margin: 32px 0;">
+          <span style="background-color: #6d28d9; color: #ffffff; padding: 12px 24px; border-radius: 6px; font-size: 28px; font-weight: bold; letter-spacing: 4px; display: inline-block;">
+            ${newOtp}
+          </span>
+        </div>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">
+          If you didn't request a code, you can safely ignore this email.
+        </p>
+      </div>
+      <div style="text-align: center; margin-top: 24px; color: #64748b; font-size: 12px;">
+        <p>&copy; ${new Date().getFullYear()} QrMonitor. All rights reserved.</p>
+      </div>
     </div>
   `;
 

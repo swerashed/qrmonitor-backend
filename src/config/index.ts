@@ -19,5 +19,7 @@ export default {
     salt_round: parseInt(process.env.SALT_ROUND || '12')
   },
   reset_pass_link: process.env.RESET_PASSWORD_LINK,
- 
+  emailSender: {
+    email: process.env.SENDER_EMAIL,
+  }
 };
