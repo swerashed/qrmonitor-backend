@@ -85,3 +85,18 @@ model Scan {
   @@index([country])
   @@map("scans")
 }
+
+model PaymentRequest {
+  id        String   @id @default(uuid())
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  email     String
+  phone     String?
+  company   String?
+  plan      String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("payment_requests")
+}
