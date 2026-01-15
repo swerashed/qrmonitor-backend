@@ -65,8 +65,6 @@ const trackScan = async (
   os: string,
   browser: string
 ) => {
-
-
   if (!qrId || !fingerprint) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Missing QR ID or fingerprint");
   }
@@ -77,35 +75,36 @@ const trackScan = async (
 
   const isUnique = !existingScan;
 
-  // Use transaction to ensure consistency
-  const [scan] = await prisma.$transaction([
-    prisma.scan.create({
-      data: {
-        qrId,
-        fingerprint,
-        userAgent,
-        ip,
-        country: location.country || null,
-        region: location.region || null,
-        city: location.city || null,
-        latitude: location.latitude || null,
-        longitude: location.longitude || null,
-        deviceType,
-        os,
-        browser,
-        isUnique,
-      },
-    }),
+  // Create scan record first
+  const scan = await prisma.scan.create({
+    data: {
+      qrId,
+      fingerprint,
+      userAgent,
+      ip,
+      country: location.country || null,
+      region: location.region || null,
+      city: location.city || null,
+      latitude: location.latitude || null,
+      longitude: location.longitude || null,
+      deviceType,
+      os,
+      browser,
+      isUnique,
+    },
+  });
 
-    prisma.qRCode.update({
-      where: { id: qrId },
-      data: {
-        totalScans: { increment: 1 },
-        uniqueScans: isUnique ? { increment: 1 } : undefined,
-        lastScans: new Date(),
-      },
-    }),
-  ]);
+  // Update QR code stats - this can happen slightly later or in parallel
+  // For now we keep it async but not necessarily awaited if we wanted extreme speed
+  // but let's keep it here for data integrity in the first pass
+  await prisma.qRCode.update({
+    where: { id: qrId },
+    data: {
+      totalScans: { increment: 1 },
+      uniqueScans: isUnique ? { increment: 1 } : undefined,
+      lastScans: new Date(),
+    },
+  });
 
   return { scan, isUnique };
 };
@@ -652,6 +651,19 @@ const getDashboardAnalytics = async (creatorId?: string) => {
   }
 }
 
+const updateScanLocation = async (scanId: string, location: any) => {
+  return await prisma.scan.update({
+    where: { id: scanId },
+    data: {
+      country: location.country || null,
+      region: location.region || null,
+      city: location.city || null,
+      latitude: location.latitude || null,
+      longitude: location.longitude || null,
+    },
+  });
+};
+
 export const QRCodeService = {
   createQRCode,
   updateQRCode,
@@ -661,5 +673,6 @@ export const QRCodeService = {
   deleteQRCode,
   getDashboardStats,
   getDashboardAnalytics,
-  getQRCodeScanSettings
+  getQRCodeScanSettings,
+  updateScanLocation
 };
