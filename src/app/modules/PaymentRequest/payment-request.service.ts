@@ -1,6 +1,7 @@
 import prisma from "@utils/prisma";
 import { PaymentRequest } from "@prisma/client";
 import { sendEmail } from "@helpers/email.helper";
+import config from "@config/index";
 
 const createPaymentRequest = async (data: PaymentRequest) => {
   const result = await prisma.paymentRequest.create({
@@ -28,7 +29,7 @@ const createPaymentRequest = async (data: PaymentRequest) => {
 
   // Send email to Admin
   await sendEmail({
-    email: "core.rashed@gmail.com",
+    email: config.adminEmail,
     subject: `New Payment Request - ${data.plan}`,
     htmlContent: adminHtml
   });

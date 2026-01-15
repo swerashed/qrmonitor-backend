@@ -23,5 +23,13 @@ export default {
   emailSender: {
     email: process.env.SENDER_EMAIL,
     name: process.env.SENDER_NAME
-  }
+  },
+  adminEmail: process.env.ADMIN_EMAIL || 'core.rashed@gmail.com',
+  allowedOrigins: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
+    'http://localhost:3000',
+    'http://localhost:4000',
+    'https://qrmonitor.app',
+    'https://staging.qrmonitor.app',
+    'https://development.qrmonitor.app'
+  ]
 };
