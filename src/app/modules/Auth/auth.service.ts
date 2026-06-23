@@ -22,10 +22,6 @@ const loginUser = async (payload: { email: string; password: string }) => {
     throw new AppError(StatusCodes.FORBIDDEN, "Password incorrect!");
   }
 
-  if (!userData.isVerified) {
-    throw new AppError(StatusCodes.FORBIDDEN, "Please verify your email first!");
-  }
-
   const accessToken = jwtHelpers.generateToken(
     {
       id: userData.id,

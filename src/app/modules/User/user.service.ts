@@ -16,9 +16,7 @@ const createUser = async (req: Request): Promise<TSafeUser> => {
     password: hashedPassword,
     role: UserRole.USER,
     name: req.body.name,
-    isVerified: false,
-    otp: Math.floor(100000 + Math.random() * 900000).toString(),
-    otpExpiry: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+    isVerified: true,
   };
 
   const existingUser = await prisma.user.findUnique({
@@ -38,40 +36,6 @@ const createUser = async (req: Request): Promise<TSafeUser> => {
     data: userData,
     select: safeUserSelect,
   });
-
-  // Send OTP Email
-  const htmlContent = `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #0f172a; border-radius: 8px; border: 1px solid #1e293b; color: #f8fafc;">
-      <div style="text-align: center; margin-bottom: 24px;">
-         <h1 style="color: #6d28d9; font-size: 24px; font-weight: bold; margin: 0;">QrMonitor</h1>
-      </div>
-      <div style="background-color: #1e293b; padding: 24px; border-radius: 8px; text-align: center;">
-        <h2 style="color: #e2e8f0; font-size: 20px; margin-top: 0;">Verify Your Account</h2>
-        <p style="color: #94a3b8; font-size: 16px; line-height: 1.6;">Hello <strong>${userData.name}</strong>,</p>
-        <p style="color: #94a3b8; font-size: 15px;">
-          Thanks for signing up! Use the code below to verify your account. This code is valid for 10 minutes.
-        </p>
-        <div style="margin: 32px 0;">
-          <span style="background-color: #6d28d9; color: #ffffff; padding: 12px 24px; border-radius: 6px; font-size: 28px; font-weight: bold; letter-spacing: 4px; display: inline-block;">
-            ${userData.otp}
-          </span>
-        </div>
-        <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">
-          If you didn't create an account, you can safely ignore this email.
-        </p>
-      </div>
-      <div style="text-align: center; margin-top: 24px; color: #64748b; font-size: 12px;">
-        <p>&copy; ${new Date().getFullYear()} QrMonitor. All rights reserved.</p>
-      </div>
-    </div>
-  `;
-
-  await import("@utils/emailSender").then((mod) => mod.default(
-    userData.email,
-    "Verify Your Account",
-    `Your OTP is ${userData.otp}`,
-    htmlContent
-  ));
 
   return createdUserData;
 };
